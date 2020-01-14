@@ -1,30 +1,28 @@
+use std::marker::{Send, Sync};
 use std::option::Option;
 
 pub type float4 = cgmath::Vector4<f64>;
 pub type float3 = cgmath::Vector3<f64>;
 pub type float2 = cgmath::Vector2<f64>;
 
-pub type VertexShader = fn(&A2v) -> V2f;
-pub type FragmentShader = fn(&V2f) -> Fout;
-
 pub struct A2v {
-    vertex: float3,
-    normal: Option<float3>,
-    texcoord: Option<float2>,
-    texcoord1: Option<float2>,
-    tangent: Option<float3>,
-    color: Option<float4>,
+    pub vertex: float3,
+    pub normal: Option<float3>,
+    pub texcoord: Option<float2>,
+    pub texcoord1: Option<float2>,
+    pub tangent: Option<float3>,
+    pub color: Option<float4>,
 }
 
 #[derive(Clone)]
 pub struct V2f {
-    pos: float3,
-    color: Option<float4>,
+    pub pos: float3,
+    pub color: Option<float4>,
 }
 
 pub struct Fout {
-    depth: f64,
-    color: float4,
+    pub depth: f64,
+    pub color: float4,
 }
 
 pub struct Framebuffer {
