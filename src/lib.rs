@@ -13,16 +13,24 @@ where
 
 /// TODO
 pub fn perform_clipping(v2f_vec: &[V2f]) -> Vec<V2f> {
-    return v2f_vec.to_owned();
+    v2f_vec.to_owned()
 }
 
-/// TODO
-pub fn perform_screen_mapping(v2f_vec: &[V2f]) -> Vec<V2f> {
-    return v2f_vec.to_owned();
+pub fn perform_screen_mapping(
+    v2f_vec: &[V2f],
+    fb: &Framebuffer,
+) -> Vec<V2f> {
+    v2f_vec
+        .par_iter()
+        .map(|v2f: &V2f| {
+            let mut v2f_out = v2f.to_owned();
+            v2f_out
+        })
+        .collect()
 }
 
 pub fn setup_triangle(v2f_vec: &[V2f], indices: &[u32]) -> Vec<V2f> {
-    return v2f_vec.to_owned();
+    v2f_vec.to_owned()
 }
 
 pub fn process_fragments<FS>(v2f_vec: &[V2f], fs: FS) -> Vec<Fout>

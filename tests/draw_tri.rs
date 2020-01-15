@@ -32,10 +32,12 @@ fn draw_tri() {
         .collect();
 
     let tri_vs = |appdate: &A2v| {
-        let pos = float3::new(0.0, 0.0, 0.0);
-        let color = Some(float4::new(0.0, 0.0, 0.0, 0.0));
+        let pos = appdate.vertex;
+        let color = Some(float4::new(1.0, 1.0, 1.0, 1.0));
         V2f { pos, color }
     };
 
-    naivegl::process_vertices(&appdate, tri_vs);
+    let v2f_vec = naivegl::process_vertices(&appdate, tri_vs);
+    let v2f_vec = naivegl::perform_clipping(&v2f_vec);
+    //let v2f_vec = naivegl::perform_screen_mapping(&v2f_vec);
 }
