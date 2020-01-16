@@ -1,3 +1,4 @@
+use naivegl::pipeline::*;
 use naivegl::types::*;
 use rayon::prelude::*;
 
@@ -44,13 +45,12 @@ fn draw_tri() {
     const SCR_WIDTH: usize = 800;
     const SCR_HEIGHT: usize = 800;
 
-    let v2f_vec = naivegl::process_vertices(&appdate, tri_vs);
-    let v2f_vec = naivegl::perform_clipping(&v2f_vec);
-    let v2f_vec = naivegl::perform_screen_mapping(
-        &v2f_vec, SCR_WIDTH, SCR_HEIGHT,
-    );
+    let v2f_vec = process_vertices(&appdate, tri_vs);
+    let v2f_vec = perform_clipping(&v2f_vec);
+    let v2f_vec =
+        perform_screen_mapping(&v2f_vec, SCR_WIDTH, SCR_HEIGHT);
 
-    let indices: [u32; 3] = [0, 1, 2];
+    let indices: [usize; 3] = [0, 1, 2];
 
-    let v2f_vec = naivegl::setup_triangle(&v2f_vec, &indices);
+    let v2f_vec = setup_triangle(&v2f_vec, &indices);
 }
