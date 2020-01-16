@@ -1,9 +1,7 @@
-use cgmath::Vector2;
-
-fn edgeFn<T>(a: Vector2<T>, b: Vector2<T>, p: Vector2<T>) -> T
+pub fn edgeFn<T>(a: (T, T), b: (T, T), p: (T, T)) -> T
 where
     T: std::ops::Sub<Output = T> + std::ops::Mul<Output = T> + Copy,
 {
     // the 3 vertices should be counter clockwise
-    return (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);
+    return (b.0 - a.0) * (p.1 - a.1) - (b.1 - a.1) * (p.0 - a.0);
 }
