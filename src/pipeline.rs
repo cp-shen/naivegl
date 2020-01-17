@@ -72,7 +72,7 @@ pub fn setup_triangle(v2f_vec: &[V2f], indices: &[usize]) -> Vec<V2f> {
             let edge02 = v2 - v0;
             let edge12 = v2 - v1;
 
-            for x in minX..maxY {
+            for x in minX..maxX {
                 for y in minY..maxY {
                     let mut overlaps = true;
 
