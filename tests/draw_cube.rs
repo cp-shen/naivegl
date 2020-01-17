@@ -1,4 +1,4 @@
 #[test]
-fn draw_tri() {
-    // TODO
+fn draw_cube() {
+    //TODO: add draw_cube test
 }

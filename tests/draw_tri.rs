@@ -16,11 +16,7 @@ fn draw_tri() {
         .enumerate()
         .filter_map(|(i, _)| {
             if i % 3 == 0 {
-                let vertex = float3::new(
-                    positions[i],
-                    positions[i + 1],
-                    positions[i + 2],
-                );
+                let vertex = float3::new(positions[i], positions[i + 1], positions[i + 2]);
                 let a2v = A2v {
                     vertex,
                     normal: None,
@@ -47,10 +43,17 @@ fn draw_tri() {
 
     let v2f_vec = process_vertices(&appdate, tri_vs);
     let v2f_vec = perform_clipping(&v2f_vec);
-    let v2f_vec =
-        perform_screen_mapping(&v2f_vec, SCR_WIDTH, SCR_HEIGHT);
+    let v2f_vec = perform_screen_mapping(&v2f_vec, SCR_WIDTH, SCR_HEIGHT);
 
     let indices: [usize; 3] = [0, 1, 2];
 
     let v2f_vec = setup_triangle(&v2f_vec, &indices);
+
+    let tri_fs = |v2f: &V2f| {
+        let depth = 0.0;
+        let color = float4::new(1.0, 1.0, 1.0, 1.0);
+        Fout { depth, color }
+    };
+
+    let fout_vec = process_fragments(&v2f_vec, tri_fs);
 }

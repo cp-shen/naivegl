@@ -13,8 +13,8 @@ where
     a2v_vec.par_iter().map(vs).collect()
 }
 
-/// TODO
 pub fn perform_clipping(v2f_vec: &[V2f]) -> Vec<V2f> {
+    //TODO: perform_clipping
     v2f_vec.to_owned()
 }
 
@@ -36,8 +36,6 @@ pub fn setup_triangle(v2f_vec: &[V2f], indices: &[usize]) -> Vec<V2f> {
         0,
         "indices length should be dividable by 3"
     );
-
-    let mut v2f_out: Vec<V2f> = Vec::new();
 
     indices
         .par_iter()
@@ -72,6 +70,8 @@ pub fn setup_triangle(v2f_vec: &[V2f], indices: &[usize]) -> Vec<V2f> {
             let edge02 = v2 - v0;
             let edge12 = v2 - v1;
 
+            let mut output: Vec<V2f> = Vec::new();
+
             for x in minX..maxX {
                 for y in minY..maxY {
                     let mut overlaps = true;
@@ -98,18 +98,20 @@ pub fn setup_triangle(v2f_vec: &[V2f], indices: &[usize]) -> Vec<V2f> {
                     };
 
                     if overlaps {
-                        //TODO
-                        let color = float4::new(0.0, 0.0, 0.0, 0.0);
+                        //TODO: add interpolation
+                        let color = float4::new(1.0, 1.0, 1.0, 1.0);
                         let color = Some(color);
-                        let pos = float3::new(0.0, 0.0, 0.0);
+                        let pos = float3::new(p_center.0, p_center.1, 0.0);
                         let v2f = V2f { color, pos };
-                        v2f_out.push(v2f)
+                        output.push(v2f)
                     }
                 }
             }
-        });
 
-    v2f_out
+            output
+        })
+        .flatten()
+        .collect()
 }
 
 pub fn process_fragments<FS>(v2f_vec: &[V2f], fs: FS) -> Vec<Fout>
