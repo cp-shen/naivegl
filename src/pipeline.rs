@@ -2,39 +2,43 @@
 
 use crate::math::*;
 use crate::types::*;
-use cgmath::Vector2;
 use rayon::prelude::*;
 use std::marker::{Send, Sync};
 
-pub fn process_vertices<VS>(a2v_vec: &[VShaderIn], vs: VS) -> Vec<VShaderOut>
+pub fn process_vertices<VS>(vin_vec: &[VShaderIn], vs: VS) -> Vec<VShaderOut>
 where
     VS: Fn(&VShaderIn) -> VShaderOut + Send + Sync,
 {
-    a2v_vec.par_iter().map(vs).collect()
+    vin_vec.par_iter().map(vs).collect()
 }
 
-pub fn perform_clipping(v2f_vec: &[VShaderOut]) -> Vec<VShaderOut> {
+pub fn perform_clipping(vout_vec: &[VShaderOut]) -> Vec<VShaderOut> {
     //TODO: perform_clipping
-    v2f_vec.to_owned()
+    vout_vec.to_owned()
 }
 
 pub fn perform_screen_mapping(
-    v2f_vec: &[VShaderOut],
+    vout_vec: &[VShaderOut],
     width: usize,
     height: usize,
 ) -> Vec<VShaderOut> {
-    v2f_vec
+    vout_vec
         .par_iter()
-        .map(|v2f: &VShaderOut| {
-            let mut v2f_out = v2f.to_owned();
-            v2f_out.pos.x *= width as f64 / 2.0;
-            v2f_out.pos.y *= height as f64 / 2.0;
-            v2f_out
+        .map(|vout: &VShaderOut| {
+            let mut vout_mapped = vout.to_owned();
+
+            //TODO: implement screen mapping
+            let screenPos = vout_mapped.clipPos.to_owned();
+            screenPos.x *= width as f64 / 2.0;
+            screenPos.y *= height as f64 / 2.0;
+
+            vout_mapped.screenPos = Some(screenPos);
+            vout_mapped
         })
         .collect()
 }
 
-pub fn setup_triangle(v2f_vec: &[VShaderOut], indices: &[usize]) -> Vec<VShaderOut> {
+pub fn setup_triangle(v2f_vec: &[VShaderOut], indices: &[usize]) -> Vec<FShaderIn> {
     assert_eq!(
         indices.len() % 3,
         0,
@@ -118,13 +122,14 @@ pub fn setup_triangle(v2f_vec: &[VShaderOut], indices: &[usize]) -> Vec<VShaderO
         .collect()
 }
 
-pub fn process_fragments<FS>(v2f_vec: &[VShaderOut], fs: FS) -> Vec<FShaderOut>
+pub fn process_fragments<FS>(fin_vec: &[FShaderIn], fs: FS) -> Vec<FShaderOut>
 where
     FS: Fn(&VShaderOut) -> FShaderOut + Send + Sync,
 {
-    v2f_vec.par_iter().map(fs).collect()
+    fin_vec.par_iter().map(fs).collect()
 }
 
 pub fn merge_output(fout_vec: &[FShaderOut], fb: &mut Framebuffer) {
+    // TODO
     fout_vec.par_iter().for_each(|fout| {})
 }
