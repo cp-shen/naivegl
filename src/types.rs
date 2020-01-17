@@ -5,7 +5,8 @@ pub type float4 = cgmath::Vector4<f64>;
 pub type float3 = cgmath::Vector3<f64>;
 pub type float2 = cgmath::Vector2<f64>;
 
-pub struct A2v {
+#[derive(Clone)]
+pub struct VShaderIn {
     pub vertex: float3,
     pub normal: Option<float3>,
     pub texcoord: Option<float2>,
@@ -15,12 +16,22 @@ pub struct A2v {
 }
 
 #[derive(Clone)]
-pub struct V2f {
+pub struct VShaderOut {
     pub pos: float3,
     pub color: Option<float4>,
 }
 
-pub struct Fout {
+#[derive(Clone)]
+pub struct FShaderIn {
+    pub x: usize,
+    pub y: usize,
+    pub color: float4,
+}
+
+#[derive(Clone)]
+pub struct FShaderOut {
+    pub x: usize,
+    pub y: usize,
     pub depth: f64,
     pub color: float4,
 }

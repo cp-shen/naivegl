@@ -6,22 +6,26 @@ use cgmath::Vector2;
 use rayon::prelude::*;
 use std::marker::{Send, Sync};
 
-pub fn process_vertices<VS>(a2v_vec: &[A2v], vs: VS) -> Vec<V2f>
+pub fn process_vertices<VS>(a2v_vec: &[VShaderIn], vs: VS) -> Vec<VShaderOut>
 where
-    VS: Fn(&A2v) -> V2f + Send + Sync,
+    VS: Fn(&VShaderIn) -> VShaderOut + Send + Sync,
 {
     a2v_vec.par_iter().map(vs).collect()
 }
 
-pub fn perform_clipping(v2f_vec: &[V2f]) -> Vec<V2f> {
+pub fn perform_clipping(v2f_vec: &[VShaderOut]) -> Vec<VShaderOut> {
     //TODO: perform_clipping
     v2f_vec.to_owned()
 }
 
-pub fn perform_screen_mapping(v2f_vec: &[V2f], width: usize, height: usize) -> Vec<V2f> {
+pub fn perform_screen_mapping(
+    v2f_vec: &[VShaderOut],
+    width: usize,
+    height: usize,
+) -> Vec<VShaderOut> {
     v2f_vec
         .par_iter()
-        .map(|v2f: &V2f| {
+        .map(|v2f: &VShaderOut| {
             let mut v2f_out = v2f.to_owned();
             v2f_out.pos.x *= width as f64 / 2.0;
             v2f_out.pos.y *= height as f64 / 2.0;
@@ -30,7 +34,7 @@ pub fn perform_screen_mapping(v2f_vec: &[V2f], width: usize, height: usize) -> V
         .collect()
 }
 
-pub fn setup_triangle(v2f_vec: &[V2f], indices: &[usize]) -> Vec<V2f> {
+pub fn setup_triangle(v2f_vec: &[VShaderOut], indices: &[usize]) -> Vec<VShaderOut> {
     assert_eq!(
         indices.len() % 3,
         0,
@@ -70,7 +74,7 @@ pub fn setup_triangle(v2f_vec: &[V2f], indices: &[usize]) -> Vec<V2f> {
             let edge02 = v2 - v0;
             let edge12 = v2 - v1;
 
-            let mut output: Vec<V2f> = Vec::new();
+            let mut output: Vec<VShaderOut> = Vec::new();
 
             for x in minX..maxX {
                 for y in minY..maxY {
@@ -102,7 +106,7 @@ pub fn setup_triangle(v2f_vec: &[V2f], indices: &[usize]) -> Vec<V2f> {
                         let color = float4::new(1.0, 1.0, 1.0, 1.0);
                         let color = Some(color);
                         let pos = float3::new(p_center.0, p_center.1, 0.0);
-                        let v2f = V2f { color, pos };
+                        let v2f = VShaderOut { color, pos };
                         output.push(v2f)
                     }
                 }
@@ -114,13 +118,13 @@ pub fn setup_triangle(v2f_vec: &[V2f], indices: &[usize]) -> Vec<V2f> {
         .collect()
 }
 
-pub fn process_fragments<FS>(v2f_vec: &[V2f], fs: FS) -> Vec<Fout>
+pub fn process_fragments<FS>(v2f_vec: &[VShaderOut], fs: FS) -> Vec<FShaderOut>
 where
-    FS: Fn(&V2f) -> Fout + Send + Sync,
+    FS: Fn(&VShaderOut) -> FShaderOut + Send + Sync,
 {
     v2f_vec.par_iter().map(fs).collect()
 }
 
-pub fn merge_output() {
-    unimplemented!();
+pub fn merge_output(fout_vec: &[FShaderOut], fb: &mut Framebuffer) {
+    fout_vec.par_iter().for_each(|fout| {})
 }

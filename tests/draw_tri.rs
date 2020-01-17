@@ -11,13 +11,13 @@ fn draw_tri() {
         1.0, 0.0, 0.0,
     ];
 
-    let appdate: Vec<A2v> = positions
+    let appdate: Vec<VShaderIn> = positions
         .par_iter()
         .enumerate()
         .filter_map(|(i, _)| {
             if i % 3 == 0 {
                 let vertex = float3::new(positions[i], positions[i + 1], positions[i + 2]);
-                let a2v = A2v {
+                let vShaderIn = VShaderIn {
                     vertex,
                     normal: None,
                     texcoord: None,
@@ -25,17 +25,17 @@ fn draw_tri() {
                     tangent: None,
                     color: None,
                 };
-                Some(a2v)
+                Some(vShaderIn)
             } else {
                 None
             }
         })
         .collect();
 
-    let tri_vs = |appdate: &A2v| {
+    let tri_vs = |appdate: &VShaderIn| {
         let pos = appdate.vertex;
         let color = None;
-        V2f { pos, color }
+        VShaderOut { pos, color }
     };
 
     const SCR_WIDTH: usize = 800;
@@ -49,10 +49,16 @@ fn draw_tri() {
 
     let v2f_vec = setup_triangle(&v2f_vec, &indices);
 
-    let tri_fs = |v2f: &V2f| {
+    let tri_fs = |v2f: &VShaderOut| {
         let depth = 0.0;
         let color = float4::new(1.0, 1.0, 1.0, 1.0);
-        Fout { depth, color }
+        //TODO: compute screen space coords
+        FShaderOut {
+            depth,
+            color,
+            x: 0,
+            y: 0,
+        }
     };
 
     let fout_vec = process_fragments(&v2f_vec, tri_fs);
