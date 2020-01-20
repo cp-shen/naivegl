@@ -1,7 +1,8 @@
+use crate::types::*;
 use itertools::Itertools;
 use rayon::prelude::*;
 
-pub fn edgeFn<T>(a: (T, T), b: (T, T), p: (T, T)) -> T
+pub fn edge_fn<T>(a: (T, T), b: (T, T), p: (T, T)) -> T
 where
     T: std::ops::Sub<Output = T> + std::ops::Mul<Output = T> + Copy,
 {
@@ -24,9 +25,9 @@ impl Triangle2d {
     pub fn overlaps_point(&self, x: f64, y: f64) -> bool {
         let mut overlaps = true;
 
-        let w0 = edgeFn((self.x1, self.y1), (self.x2, self.y2), (x, y));
-        let w1 = edgeFn((self.x2, self.y2), (self.x0, self.y0), (x, y));
-        let w2 = edgeFn((self.x0, self.y0), (self.x1, self.y1), (x, y));
+        let w0 = edge_fn((self.x1, self.y1), (self.x2, self.y2), (x, y));
+        let w1 = edge_fn((self.x2, self.y2), (self.x0, self.y0), (x, y));
+        let w2 = edge_fn((self.x0, self.y0), (self.x1, self.y1), (x, y));
 
         let edge01 = (self.x1 - self.x0, self.y1 - self.y0);
         let edge02 = (self.x2 - self.x0, self.y2 - self.y0);
@@ -66,13 +67,13 @@ impl Triangle2d {
         }
 
         //Compute triangle bounding box
-        let minX: usize = self.x0.min(self.x1).min(self.x2).floor() as usize;
-        let minY: usize = self.x0.min(self.x1).min(self.y2).floor() as usize;
-        let maxX: usize = self.y0.max(self.y1).max(self.y2).floor() as usize;
-        let maxY: usize = self.y0.max(self.y1).max(self.y2).floor() as usize;
+        let min_x: usize = self.x0.min(self.x1).min(self.x2).floor() as usize;
+        let min_y: usize = self.x0.min(self.x1).min(self.y2).floor() as usize;
+        let max_x: usize = self.y0.max(self.y1).max(self.y2).floor() as usize;
+        let max_y: usize = self.y0.max(self.y1).max(self.y2).floor() as usize;
 
         let candidates: Vec<(usize, usize)> =
-            (minX..=maxX).cartesian_product(minY..=maxY).collect();
+            (min_x..=max_x).cartesian_product(min_y..=max_y).collect();
         candidates
             .par_iter()
             .filter_map(|point: &(usize, usize)| {
@@ -84,4 +85,17 @@ impl Triangle2d {
             })
             .collect()
     }
+}
+
+pub struct Camera {
+    near: f64,
+    far: f64,
+    fovy: f64,
+    aspect: f64,
+}
+
+pub struct Transform {
+    position: float3,
+    scale: float3,
+    rotation: cgmath::Quaternion<f64>,
 }

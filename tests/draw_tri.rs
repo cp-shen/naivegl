@@ -17,7 +17,7 @@ fn draw_tri() {
         .filter_map(|(i, _)| {
             if i % 3 == 0 {
                 let vertex = float4::new(positions[i], positions[i + 1], positions[i + 2], 1.0);
-                let vShaderIn = VShaderIn {
+                let vin = VShaderIn {
                     vertex,
                     normal: None,
                     texcoord: None,
@@ -25,7 +25,7 @@ fn draw_tri() {
                     tangent: None,
                     color: None,
                 };
-                Some(vShaderIn)
+                Some(vin)
             } else {
                 None
             }
@@ -33,15 +33,15 @@ fn draw_tri() {
         .collect();
 
     let tri_vs = |vin: &VShaderIn| {
-        let clipPos = vin.vertex;
-        let vertColor = None;
-        let worldNormal = None;
-        let screenPos = None;
+        let clip_pos = vin.vertex;
+        let vert_color = None;
+        let world_normal = None;
+        let screen_pos = None;
         VShaderOut {
-            clipPos,
-            screenPos,
-            vertColor,
-            worldNormal,
+            clip_pos,
+            screen_pos,
+            vert_color,
+            world_normal,
         }
     };
 
@@ -57,17 +57,17 @@ fn draw_tri() {
 
     let tri_fs = |fin: &FShaderIn| {
         let depth = fin.depth;
-        let color = match fin.value.vertColor {
+        let color = match fin.value.vert_color {
             Some(color) => color,
             None => float4::new(1.0, 1.0, 1.0, 1.0),
         };
-        let screenX = fin.screenX;
-        let screenY = fin.screenY;
+        let screen_x = fin.screen_x;
+        let screen_y = fin.screen_y;
         FShaderOut {
             depth,
             color,
-            screenX,
-            screenY,
+            screen_x,
+            screen_y,
         }
     };
 

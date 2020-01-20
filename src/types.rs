@@ -1,4 +1,3 @@
-use std::marker::{Send, Sync};
 use std::option::Option;
 
 #[allow(non_camel_case_types)]
@@ -20,24 +19,24 @@ pub struct VShaderIn {
 
 #[derive(Clone)]
 pub struct VShaderOut {
-    pub clipPos: float4,
-    pub screenPos: Option<float4>,
-    pub worldNormal: Option<float4>,
-    pub vertColor: Option<float4>,
+    pub clip_pos: float4,
+    pub screen_pos: Option<float4>,
+    pub world_normal: Option<float4>,
+    pub vert_color: Option<float4>,
 }
 
 #[derive(Clone)]
 pub struct FShaderIn {
-    pub screenX: usize,
-    pub screenY: usize,
+    pub screen_x: usize,
+    pub screen_y: usize,
     pub depth: f64,
     pub value: VShaderOut,
 }
 
 #[derive(Clone)]
 pub struct FShaderOut {
-    pub screenX: usize,
-    pub screenY: usize,
+    pub screen_x: usize,
+    pub screen_y: usize,
     pub depth: f64,
     pub color: float4,
 }

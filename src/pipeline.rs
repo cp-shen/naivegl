@@ -27,10 +27,10 @@ pub fn perform_screen_mapping(
         .map(|vout: &VShaderOut| {
             let mut vout_mapped = vout.to_owned();
 
-            //TODO: transform clipPos to NDC
+            //TODO: transform clip_pos to NDC
 
             //transform NDC to screenPos
-            let mut ndc_pos = vout_mapped.clipPos;
+            let mut ndc_pos = vout_mapped.clip_pos;
             if ndc_pos.x > 1.0 || ndc_pos.x < -1.0 || ndc_pos.y > 1.0 || ndc_pos.y < -1.0 {
                 panic!("invalid ndc pos")
             }
@@ -40,7 +40,7 @@ pub fn perform_screen_mapping(
             ndc_pos.x *= (width - 1) as f64 / 2.0;
             ndc_pos.y *= (height - 1) as f64 / 2.0;
 
-            vout_mapped.screenPos = Some(ndc_pos);
+            vout_mapped.screen_pos = Some(ndc_pos);
             vout_mapped
         })
         .collect()
@@ -64,9 +64,9 @@ pub fn setup_triangle(vout_vec: &[VShaderOut], indices: &[usize]) -> Vec<FShader
             }
         })
         .map(|(i0, i1, i2)| {
-            let mut v0 = vout_vec[i0].screenPos.unwrap();
-            let mut v1 = vout_vec[i1].screenPos.unwrap();
-            let v2 = vout_vec[i2].screenPos.unwrap();
+            let mut v0 = vout_vec[i0].screen_pos.unwrap();
+            let mut v1 = vout_vec[i1].screen_pos.unwrap();
+            let v2 = vout_vec[i2].screen_pos.unwrap();
 
             let val = (v1.y - v0.y) * (v2.x - v1.x) - (v1.x - v0.x) * (v2.y - v1.y);
 
@@ -89,9 +89,9 @@ pub fn setup_triangle(vout_vec: &[VShaderOut], indices: &[usize]) -> Vec<FShader
             tri2d.get_pixels()
         })
         .flatten()
-        .map(|(screenX, screenY)| FShaderIn {
-            screenX,
-            screenY,
+        .map(|(screen_x, screen_y)| FShaderIn {
+            screen_x,
+            screen_y,
             depth: 0.0,
             value: vout_vec[0].clone(), //FIXME
         })
@@ -114,7 +114,7 @@ pub fn merge_output(fout_vec: &[FShaderOut], fb: &mut Framebuffer) {
             get_8bit_color(c.z),
             get_8bit_color(c.w),
         );
-        fb.set_pixel(fout.screenX, fout.screenY, color)
+        fb.set_pixel(fout.screen_x, fout.screen_y, color)
     })
 }
 
