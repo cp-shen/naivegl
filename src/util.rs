@@ -2,27 +2,68 @@ use crate::types::*;
 use itertools::Itertools;
 use rayon::prelude::*;
 
-pub fn edge_fn<T>(a: (T, T), b: (T, T), p: (T, T)) -> T
+/// if the 3 vertices are counter-clockwise
+/// returns positive value when point p is on the left side of line ab
+/// if the 3 vertices are colinear
+/// returns 0
+fn edge_fn<T>(a: (T, T), b: (T, T), p: (T, T)) -> T
 where
     T: std::ops::Sub<Output = T> + std::ops::Mul<Output = T> + Copy,
 {
-    // the 3 vertices should be counter clockwise
     return (b.0 - a.0) * (p.1 - a.1) - (b.1 - a.1) * (p.0 - a.0);
 }
 
+/// the triangle is facing front if the 3 vertices are not counter-clockwise
 pub struct Triangle2d {
-    pub x0: f64,
-    pub y0: f64,
-    pub x1: f64,
-    pub y1: f64,
-    pub x2: f64,
-    pub y2: f64,
+    x0: f64,
+    y0: f64,
+    x1: f64,
+    y1: f64,
+    x2: f64,
+    y2: f64,
 }
 
 impl Triangle2d {
-    /// Test if a point is in the triangle
-    /// Top-left rule is applied
-    pub fn overlaps_point(&self, x: f64, y: f64) -> bool {
+    pub fn new(vertices: &[f64]) -> Triangle2d {
+        if vertices.len() < 6 {
+            panic!("provided data is not enough to build triangle2d");
+        };
+
+        let tri = Triangle2d {
+            x0: vertices[0],
+            y0: vertices[1],
+            x1: vertices[2],
+            y1: vertices[3],
+            x2: vertices[4],
+            y2: vertices[5],
+        };
+
+        if tri.is_collinear() {
+            panic!("the 3 vertices of a triangle should not be colinear");
+        };
+
+        tri
+    }
+
+    fn is_counter_clockwise(&self) -> bool {
+        let val =
+            (self.y1 - self.y0) * (self.x2 - self.x1) - (self.x1 - self.x0) * (self.y2 - self.y1);
+        val < 0.0
+    }
+
+    fn is_collinear(&self) -> bool {
+        let val =
+            (self.y1 - self.y0) * (self.x2 - self.x1) - (self.x1 - self.x0) * (self.y2 - self.y1);
+        val == 0.0
+    }
+
+    /// test if a point is in the triangle
+    /// top-left rule is applied
+    fn overlaps_point(&self, x: f64, y: f64) -> bool {
+        if !self.is_counter_clockwise() {
+            return false;
+        }
+
         let mut overlaps = true;
 
         let w0 = edge_fn((self.x1, self.y1), (self.x2, self.y2), (x, y));
@@ -53,6 +94,10 @@ impl Triangle2d {
     }
 
     pub fn get_pixels(&self) -> Vec<(usize, usize)> {
+        if !self.is_counter_clockwise() {
+            return vec![];
+        }
+
         if self.x0 < 0.0
             || self.y0 < 0.0
             || self.x1 < 0.0
@@ -74,6 +119,7 @@ impl Triangle2d {
 
         let candidates: Vec<(usize, usize)> =
             (min_x..=max_x).cartesian_product(min_y..=max_y).collect();
+
         candidates
             .par_iter()
             .filter_map(|point: &(usize, usize)| {

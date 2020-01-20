@@ -64,28 +64,11 @@ pub fn setup_triangle(vout_vec: &[VShaderOut], indices: &[usize]) -> Vec<FShader
             }
         })
         .map(|(i0, i1, i2)| {
-            let mut v0 = vout_vec[i0].screen_pos.unwrap();
-            let mut v1 = vout_vec[i1].screen_pos.unwrap();
+            let v0 = vout_vec[i0].screen_pos.unwrap();
+            let v1 = vout_vec[i1].screen_pos.unwrap();
             let v2 = vout_vec[i2].screen_pos.unwrap();
 
-            let val = (v1.y - v0.y) * (v2.x - v1.x) - (v1.x - v0.x) * (v2.y - v1.y);
-
-            if val == 0.0 {
-                panic!("the 3 vertices of a triangle should not be colinear");
-            } else if val > 0.0 {
-                //the 3 vertices should be counter clock-wise
-                std::mem::swap(&mut v0, &mut v1);
-            }
-
-            let tri2d = Triangle2d {
-                x0: v0.x,
-                y0: v0.y,
-                x1: v1.x,
-                y1: v1.y,
-                x2: v2.x,
-                y2: v2.y,
-            };
-
+            let tri2d = Triangle2d::new(&[v0.x, v0.y, v1.x, v1.y, v2.x, v2.y]);
             tri2d.get_pixels()
         })
         .flatten()

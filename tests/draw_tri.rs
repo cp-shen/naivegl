@@ -14,7 +14,7 @@ fn draw_tri() {
         1.0, 0.0, 0.0,
     ];
 
-    let indices: [usize; 3] = [0, 1, 2];
+    let indices: [usize; 3] = [0, 2, 1];
 
     let vin_vec: Vec<VShaderIn> = positions
         .par_iter()
