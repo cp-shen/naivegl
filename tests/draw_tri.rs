@@ -6,17 +6,17 @@ use rayon::prelude::*;
 fn draw_tri() {
     #[rustfmt::skip]
     let positions: Vec<f64> = vec![
-        0.0, 0.0, 0.0,
+        -1.0, -1.0, 0.0,
         0.0, 1.0, 0.0,
         1.0, 0.0, 0.0,
     ];
 
-    let appdate: Vec<VShaderIn> = positions
+    let vin_vec: Vec<VShaderIn> = positions
         .par_iter()
         .enumerate()
         .filter_map(|(i, _)| {
             if i % 3 == 0 {
-                let vertex = float3::new(positions[i], positions[i + 1], positions[i + 2]);
+                let vertex = float4::new(positions[i], positions[i + 1], positions[i + 2], 1.0);
                 let vShaderIn = VShaderIn {
                     vertex,
                     normal: None,
@@ -32,34 +32,51 @@ fn draw_tri() {
         })
         .collect();
 
-    let tri_vs = |appdate: &VShaderIn| {
-        let pos = appdate.vertex;
-        let color = None;
-        VShaderOut { pos, color }
+    let tri_vs = |vin: &VShaderIn| {
+        let clipPos = vin.vertex;
+        let vertColor = None;
+        let worldNormal = None;
+        let screenPos = None;
+        VShaderOut {
+            clipPos,
+            screenPos,
+            vertColor,
+            worldNormal,
+        }
     };
 
     const SCR_WIDTH: usize = 800;
     const SCR_HEIGHT: usize = 800;
 
-    let v2f_vec = process_vertices(&appdate, tri_vs);
-    let v2f_vec = perform_clipping(&v2f_vec);
-    let v2f_vec = perform_screen_mapping(&v2f_vec, SCR_WIDTH, SCR_HEIGHT);
-
+    let vout_vec = process_vertices(&vin_vec, tri_vs);
+    let vout_vec_clipped = perform_clipping(&vout_vec);
+    let vout_vec_mapped = perform_screen_mapping(&vout_vec_clipped, SCR_WIDTH, SCR_HEIGHT);
     let indices: [usize; 3] = [0, 1, 2];
 
-    let v2f_vec = setup_triangle(&v2f_vec, &indices);
+    let fin_vec = setup_triangle(&vout_vec_mapped, &indices);
 
-    let tri_fs = |v2f: &VShaderOut| {
-        let depth = 0.0;
-        let color = float4::new(1.0, 1.0, 1.0, 1.0);
-        //TODO: compute screen space coords
+    let tri_fs = |fin: &FShaderIn| {
+        let depth = fin.depth;
+        let color = match fin.value.vertColor {
+            Some(color) => color,
+            None => float4::new(1.0, 1.0, 1.0, 1.0),
+        };
+        let screenX = fin.screenX;
+        let screenY = fin.screenY;
         FShaderOut {
             depth,
             color,
-            x: 0,
-            y: 0,
+            screenX,
+            screenY,
         }
     };
 
-    let fout_vec = process_fragments(&v2f_vec, tri_fs);
+    let fout_vec = process_fragments(&fin_vec, tri_fs);
+
+    let mut fb = Framebuffer::new(SCR_WIDTH, SCR_HEIGHT);
+
+    merge_output(&fout_vec, &mut fb);
+
+    fb.write_image(std::path::Path::new("output/draw_tri.png"))
+        .unwrap();
 }

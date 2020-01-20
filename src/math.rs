@@ -1,3 +1,6 @@
+use itertools::Itertools;
+use rayon::prelude::*;
+
 pub fn edgeFn<T>(a: (T, T), b: (T, T), p: (T, T)) -> T
 where
     T: std::ops::Sub<Output = T> + std::ops::Mul<Output = T> + Copy,
@@ -7,12 +10,12 @@ where
 }
 
 pub struct Triangle2d {
-    x0: f64,
-    y0: f64,
-    x1: f64,
-    y1: f64,
-    x2: f64,
-    y2: f64,
+    pub x0: f64,
+    pub y0: f64,
+    pub x1: f64,
+    pub y1: f64,
+    pub x2: f64,
+    pub y2: f64,
 }
 
 impl Triangle2d {
@@ -68,6 +71,17 @@ impl Triangle2d {
         let maxX: usize = self.y0.max(self.y1).max(self.y2).floor() as usize;
         let maxY: usize = self.y0.max(self.y1).max(self.y2).floor() as usize;
 
-        unimplemented!()
+        let candidates: Vec<(usize, usize)> =
+            (minX..=maxX).cartesian_product(minY..=maxY).collect();
+        candidates
+            .par_iter()
+            .filter_map(|point: &(usize, usize)| {
+                if self.overlaps_point(point.0 as f64, point.1 as f64) {
+                    Some(point.to_owned())
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
 }
