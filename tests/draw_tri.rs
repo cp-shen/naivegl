@@ -6,7 +6,7 @@ use rayon::prelude::*;
 fn draw_tri() {
     #[rustfmt::skip]
     let positions: Vec<f64> = vec![
-        -1.0, -1.0, 0.0,
+        0.0, 0.0, 0.0,
         0.0, 1.0, 0.0,
         1.0, 0.0, 0.0,
     ];

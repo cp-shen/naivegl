@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
-use crate::math::*;
 use crate::types::*;
+use crate::util::*;
 use rayon::prelude::*;
 use std::marker::{Send, Sync};
 

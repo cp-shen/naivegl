@@ -62,7 +62,11 @@ impl Framebuffer {
     pub fn write_image(&mut self, path: &std::path::Path) -> std::io::Result<()> {
         let imgbuf: image::RgbaImage =
             image::ImageBuffer::from_fn(self.width as u32, self.height as u32, |x, y| {
-                let color = self.color[x as usize + y as usize * self.width];
+                let location_x = x as usize;
+                let location_y = (self.height - 1 - y as usize)
+                    .checked_mul(self.width)
+                    .unwrap();
+                let color = self.color[location_x.checked_add(location_y).unwrap()];
                 image::Rgba([color.0, color.1, color.2, color.3])
             });
 
