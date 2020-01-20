@@ -87,6 +87,7 @@ impl Triangle2d {
     }
 }
 
+#[allow(dead_code)]
 pub struct Camera {
     near: f64,
     far: f64,
@@ -94,6 +95,7 @@ pub struct Camera {
     aspect: f64,
 }
 
+#[allow(dead_code)]
 pub struct Transform {
     position: float3,
     scale: float3,

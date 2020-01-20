@@ -4,12 +4,17 @@ use rayon::prelude::*;
 
 #[test]
 fn draw_tri() {
+    const SCR_WIDTH: usize = 800;
+    const SCR_HEIGHT: usize = 800;
+
     #[rustfmt::skip]
-    let positions: Vec<f64> = vec![
+    let positions: [f64; 3 * 3] = [
         0.0, 0.0, 0.0,
         0.0, 1.0, 0.0,
         1.0, 0.0, 0.0,
     ];
+
+    let indices: [usize; 3] = [0, 1, 2];
 
     let vin_vec: Vec<VShaderIn> = positions
         .par_iter()
@@ -45,16 +50,6 @@ fn draw_tri() {
         }
     };
 
-    const SCR_WIDTH: usize = 800;
-    const SCR_HEIGHT: usize = 800;
-
-    let vout_vec = process_vertices(&vin_vec, tri_vs);
-    let vout_vec_clipped = perform_clipping(&vout_vec);
-    let vout_vec_mapped = perform_screen_mapping(&vout_vec_clipped, SCR_WIDTH, SCR_HEIGHT);
-    let indices: [usize; 3] = [0, 1, 2];
-
-    let fin_vec = setup_triangle(&vout_vec_mapped, &indices);
-
     let tri_fs = |fin: &FShaderIn| {
         let depth = fin.depth;
         let color = match fin.value.vert_color {
@@ -71,6 +66,10 @@ fn draw_tri() {
         }
     };
 
+    let vout_vec = process_vertices(&vin_vec, tri_vs);
+    let vout_vec_clipped = perform_clipping(&vout_vec);
+    let vout_vec_mapped = perform_screen_mapping(&vout_vec_clipped, SCR_WIDTH, SCR_HEIGHT);
+    let fin_vec = setup_triangle(&vout_vec_mapped, &indices);
     let fout_vec = process_fragments(&fin_vec, tri_fs);
 
     let mut fb = Framebuffer::new(SCR_WIDTH, SCR_HEIGHT);
