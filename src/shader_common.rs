@@ -6,6 +6,8 @@ pub type float4 = cgmath::Vector4<f64>;
 pub type float3 = cgmath::Vector3<f64>;
 #[allow(non_camel_case_types)]
 pub type float2 = cgmath::Vector2<f64>;
+#[allow(non_camel_case_types)]
+pub type float4x4 = cgmath::Matrix4<f64>;
 
 #[derive(Clone)]
 pub struct VShaderIn {
