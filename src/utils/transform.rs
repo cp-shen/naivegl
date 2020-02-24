@@ -1,3 +1,5 @@
+use crate::types::*;
+
 #[allow(dead_code)]
 pub struct Transform {
     position: float3,
