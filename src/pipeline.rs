@@ -65,21 +65,87 @@ pub fn setup_triangle(vout_vec: &[VShaderOut], indices: &[usize]) -> Vec<FShader
                 None
             }
         })
-        .map(|(i0, i1, i2)| {
-            let v0 = vout_vec[i0].screen_pos.unwrap();
-            let v1 = vout_vec[i1].screen_pos.unwrap();
-            let v2 = vout_vec[i2].screen_pos.unwrap();
+        .map(|(i0, i1, i2)| -> Vec<FShaderIn> {
+            let v0 = vout_vec[i0].to_owned();
+            let v1 = vout_vec[i1].to_owned();
+            let v2 = vout_vec[i2].to_owned();
 
-            let tri2d = Triangle2d::new(&[v0.x, v0.y, v1.x, v1.y, v2.x, v2.y]);
-            tri2d.get_pixels()
+            let scr0 = v0.screen_pos.unwrap();
+            let scr1 = v1.screen_pos.unwrap();
+            let scr2 = v2.screen_pos.unwrap();
+
+            let tri2d = Triangle2d::new(&[scr0.x, scr0.y, scr1.x, scr1.y, scr2.x, scr2.y]);
+            let pixels = tri2d.get_pixels();
+
+            pixels
+                .par_iter()
+                .map(|(x, y, alpha, beta, gamma)| {
+                    let screen_x = x.to_owned();
+                    let screen_y = y.to_owned();
+                    let depth = scr0.z * alpha + scr1.z * beta + scr2.z * gamma;
+
+                    let clip_pos =
+                        v0.clip_pos * *alpha + v1.clip_pos * *beta + v2.clip_pos * *gamma;
+
+                    let screen_pos = if v0
+                        .screen_pos
+                        .and(v1.screen_pos.and(v2.screen_pos))
+                        .is_some()
+                    {
+                        Some(
+                            v0.screen_pos.unwrap() * *alpha
+                                + v1.screen_pos.unwrap() * *beta
+                                + v2.screen_pos.unwrap() * *gamma,
+                        )
+                    } else {
+                        None
+                    };
+
+                    let world_normal = if v0
+                        .world_normal
+                        .and(v1.world_normal.and(v2.world_normal))
+                        .is_some()
+                    {
+                        Some(
+                            v0.world_normal.unwrap() * *alpha
+                                + v1.world_normal.unwrap() * *beta
+                                + v2.world_normal.unwrap() * *gamma,
+                        )
+                    } else {
+                        None
+                    };
+
+                    let vert_color = if v0
+                        .vert_color
+                        .and(v1.vert_color.and(v2.vert_color))
+                        .is_some()
+                    {
+                        Some(
+                            v0.vert_color.unwrap() * *alpha
+                                + v1.vert_color.unwrap() * *beta
+                                + v2.vert_color.unwrap() * *gamma,
+                        )
+                    } else {
+                        None
+                    };
+
+                    let interpolated = VShaderOut {
+                        clip_pos,
+                        screen_pos,
+                        world_normal,
+                        vert_color,
+                    };
+
+                    FShaderIn {
+                        screen_x,
+                        screen_y,
+                        depth,
+                        value: interpolated,
+                    }
+                })
+                .collect()
         })
         .flatten()
-        .map(|(screen_x, screen_y, alpha, beta, gamma)| FShaderIn {
-            screen_x,
-            screen_y,
-            depth: 0.0,                 //FIXME
-            value: vout_vec[0].clone(), //FIXME
-        })
         .collect()
 }
 
