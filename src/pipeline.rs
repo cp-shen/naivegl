@@ -1,7 +1,8 @@
 #![allow(dead_code)]
 
 use crate::types::*;
-use crate::util::*;
+use crate::utils::color::*;
+use crate::utils::triangle2d::*;
 use rayon::prelude::*;
 use std::marker::{Send, Sync};
 
@@ -101,8 +102,21 @@ pub fn merge_output(fout_vec: &[FShaderOut], fb: &mut Framebuffer) {
     })
 }
 
-fn get_8bit_color(f: f64) -> u8 {
-    assert_eq!(f >= 0.0, true);
-    assert_eq!(f <= 1.0, true);
-    (f * 255.0).round() as u8
+pub fn process_pipeline<VS, FS>(
+    vin_vec: &[VShaderIn],
+    indices: &[usize],
+    vs: VS,
+    fs: FS,
+    fb: &mut Framebuffer,
+) where
+    VS: Fn(&VShaderIn) -> VShaderOut + Send + Sync,
+    FS: Fn(&FShaderIn) -> FShaderOut + Send + Sync,
+{
+    let vout_vec = process_vertices(&vin_vec, vs);
+    let vout_vec_clipped = perform_clipping(&vout_vec);
+    let vout_vec_mapped =
+        perform_screen_mapping(&vout_vec_clipped, fb.get_width(), fb.get_height());
+    let fin_vec = setup_triangle(&vout_vec_mapped, &indices);
+    let fout_vec = process_fragments(&fin_vec, fs);
+    merge_output(&fout_vec, fb);
 }

@@ -49,6 +49,14 @@ pub struct Framebuffer {
 }
 
 impl Framebuffer {
+    pub fn get_width(&self) -> usize {
+        self.width
+    }
+
+    pub fn get_height(&self) -> usize {
+        self.height
+    }
+
     pub fn new(width: usize, height: usize) -> Framebuffer {
         let size = width.checked_mul(height).unwrap();
         let color = vec![(0, 0, 0, 0); size];

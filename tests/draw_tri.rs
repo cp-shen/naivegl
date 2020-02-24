@@ -66,15 +66,8 @@ fn draw_tri() {
         }
     };
 
-    let vout_vec = process_vertices(&vin_vec, tri_vs);
-    let vout_vec_clipped = perform_clipping(&vout_vec);
-    let vout_vec_mapped = perform_screen_mapping(&vout_vec_clipped, SCR_WIDTH, SCR_HEIGHT);
-    let fin_vec = setup_triangle(&vout_vec_mapped, &indices);
-    let fout_vec = process_fragments(&fin_vec, tri_fs);
-
     let mut fb = Framebuffer::new(SCR_WIDTH, SCR_HEIGHT);
-
-    merge_output(&fout_vec, &mut fb);
+    process_pipeline(&vin_vec, &indices, tri_vs, tri_fs, &mut fb);
 
     fb.write_image(std::path::Path::new("output/draw_tri.png"))
         .unwrap();
