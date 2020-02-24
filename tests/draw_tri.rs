@@ -1,5 +1,6 @@
+use naivegl::framebuffer::*;
 use naivegl::pipeline::*;
-use naivegl::types::*;
+use naivegl::shader_common::*;
 use rayon::prelude::*;
 
 #[test]
@@ -28,7 +29,7 @@ fn draw_tri() {
                     texcoord: None,
                     texcoord1: None,
                     tangent: None,
-                    color: None,
+                    color: Some(vertex),
                 };
                 Some(vin)
             } else {
@@ -39,7 +40,7 @@ fn draw_tri() {
 
     let tri_vs = |vin: &VShaderIn| {
         let clip_pos = vin.vertex;
-        let vert_color = None;
+        let vert_color = vin.color;
         let world_normal = None;
         let screen_pos = None;
         VShaderOut {

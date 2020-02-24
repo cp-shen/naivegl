@@ -1,4 +1,4 @@
-use crate::types::*;
+use crate::shader_common::*;
 
 #[allow(dead_code)]
 pub struct Transform {

@@ -1,5 +1,6 @@
+use naivegl::framebuffer::*;
 use naivegl::pipeline::*;
-use naivegl::types::*;
+use naivegl::shader_common::*;
 use rayon::prelude::*;
 
 #[test]

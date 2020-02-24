@@ -48,41 +48,43 @@ impl Triangle2d {
 
     /// test if a point is in the triangle
     /// top-left rule is applied
-    fn overlaps_point(&self, x: f64, y: f64) -> bool {
+    fn overlaps_point(&self, x: f64, y: f64) -> (bool, f64, f64, f64) {
         if !self.is_counter_clockwise() {
-            return false;
+            return (false, 0.0, 0.0, 0.0);
         }
 
         let mut overlaps = true;
-
-        let w0 = edge_fn((self.x1, self.y1), (self.x2, self.y2), (x, y));
-        let w1 = edge_fn((self.x2, self.y2), (self.x0, self.y0), (x, y));
-        let w2 = edge_fn((self.x0, self.y0), (self.x1, self.y1), (x, y));
 
         let edge01 = (self.x1 - self.x0, self.y1 - self.y0);
         let edge02 = (self.x2 - self.x0, self.y2 - self.y0);
         let edge12 = (self.x2 - self.x1, self.y2 - self.y1);
 
-        overlaps &= if w0 == 0.0 {
+        let (alpha, beta, gamma) = self.get_barycentric_coord(x, y);
+
+        overlaps &= if alpha == 0.0 {
             (edge12.1 == 0.0 && edge12.0 < 0.0) || edge12.1 < 0.0
         } else {
-            w0 > 0.0
+            alpha > 0.0
         };
-        overlaps &= if w1 == 0.0 {
+        overlaps &= if beta == 0.0 {
             (edge02.1 == 0.0 && edge02.0 < 0.0) || edge02.1 < 0.0
         } else {
-            w1 > 0.0
+            beta > 0.0
         };
-        overlaps &= if w2 == 0.0 {
+        overlaps &= if gamma == 0.0 {
             (edge01.1 == 0.0 && edge01.0 < 0.0) || edge01.1 < 0.0
         } else {
-            w2 > 0.0
+            gamma > 0.0
         };
 
-        overlaps
+        overlaps &= alpha > 0.0;
+        overlaps &= beta > 0.0;
+        overlaps &= gamma > 0.0;
+
+        (overlaps, alpha, beta, gamma)
     }
 
-    pub fn get_pixels(&self) -> Vec<(usize, usize)> {
+    pub fn get_pixels(&self) -> Vec<(usize, usize, f64, f64, f64)> {
         if !self.is_counter_clockwise() {
             return vec![];
         }
@@ -112,8 +114,10 @@ impl Triangle2d {
         candidates
             .par_iter()
             .filter_map(|point: &(usize, usize)| {
-                if self.overlaps_point(point.0 as f64, point.1 as f64) {
-                    Some(point.to_owned())
+                let (overlaps, alpha, beta, gamma) =
+                    self.overlaps_point(point.0 as f64, point.1 as f64);
+                if overlaps {
+                    Some((point.0, point.1, alpha, beta, gamma))
                 } else {
                     None
                 }
@@ -121,7 +125,7 @@ impl Triangle2d {
             .collect()
     }
 
-    pub fn get_barycentric_coord(&self, x: f64, y: f64) -> (f64, f64, f64) {
+    fn get_barycentric_coord(&self, x: f64, y: f64) -> (f64, f64, f64) {
         let xa = self.x0;
         let xb = self.x1;
         let xc = self.x2;

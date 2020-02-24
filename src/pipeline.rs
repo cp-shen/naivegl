@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
-use crate::types::*;
+use crate::framebuffer::*;
+use crate::shader_common::*;
 use crate::utils::color::*;
 use crate::utils::triangle2d::*;
 use rayon::prelude::*;
@@ -73,10 +74,10 @@ pub fn setup_triangle(vout_vec: &[VShaderOut], indices: &[usize]) -> Vec<FShader
             tri2d.get_pixels()
         })
         .flatten()
-        .map(|(screen_x, screen_y)| FShaderIn {
+        .map(|(screen_x, screen_y, alpha, beta, gamma)| FShaderIn {
             screen_x,
             screen_y,
-            depth: 0.0,
+            depth: 0.0,                 //FIXME
             value: vout_vec[0].clone(), //FIXME
         })
         .collect()

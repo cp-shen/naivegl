@@ -1,3 +1,4 @@
+pub mod framebuffer;
 pub mod pipeline;
-pub mod types;
+pub mod shader_common;
 pub mod utils;
