@@ -1,4 +1,3 @@
-use super::math::*;
 use itertools::Itertools;
 use rayon::prelude::*;
 
@@ -96,10 +95,7 @@ impl Triangle2d {
             || self.x2 < 0.0
             || self.y2 < 0.0
         {
-            panic!(
-                "to get all pixels,
-                coords of the triangle vertices should not be negative"
-            );
+            panic!("to get all pixels, coords of the triangle vertices should not be negative");
         }
 
         //Compute triangle bounding box

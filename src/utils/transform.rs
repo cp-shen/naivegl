@@ -2,9 +2,9 @@ use crate::shader_common::*;
 
 #[allow(dead_code)]
 pub struct Transform {
-    translation: float3,
-    scale: float3,
-    rotation: cgmath::Quaternion<f64>,
+    pub translation: float3,
+    pub scale: float3,
+    pub rotation: cgmath::Quaternion<f64>,
 }
 
 impl Transform {

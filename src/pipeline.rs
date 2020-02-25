@@ -2,8 +2,7 @@
 
 use crate::framebuffer::*;
 use crate::shader_common::*;
-use crate::utils::color::*;
-use crate::utils::triangle2d::*;
+use crate::utils::*;
 use rayon::prelude::*;
 use std::marker::{Send, Sync};
 
@@ -38,7 +37,7 @@ pub fn perform_screen_mapping(
             };
             //validate NDC
             if ndc_pos.x > 1.0 || ndc_pos.x < -1.0 || ndc_pos.y > 1.0 || ndc_pos.y < -1.0 {
-                panic!("invalid ndc pos")
+                panic!("invalid ndc pos: x={}, y={}", ndc_pos.x, ndc_pos.y)
             }
 
             //transform NDC to screenPos

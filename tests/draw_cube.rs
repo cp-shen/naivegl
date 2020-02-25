@@ -1,6 +1,8 @@
+use cgmath::prelude::*;
 use naivegl::framebuffer::*;
 use naivegl::pipeline::*;
 use naivegl::shader_common::*;
+use naivegl::utils::*;
 use rayon::prelude::*;
 
 #[test]
@@ -20,7 +22,7 @@ fn draw_cube() {
         1.0, 1.0, 1.0,
     ];
 
-    let indices: [usize; 3] = [0, 1, 2];
+    let indices: [usize; 3] = [0, 2, 1];
 
     let vin_vec: Vec<VShaderIn> = positions
         .par_iter()
@@ -43,8 +45,29 @@ fn draw_cube() {
         })
         .collect();
 
+    let camera = Camera {
+        near: 0.1,
+        far: 20.0,
+        fovy: cgmath::Deg::<f64>(30.0),
+        aspect: SCR_WIDTH as f64 / SCR_HEIGHT as f64,
+        position: float3::new(0.0, 0.0, 10.0),
+        rotation: cgmath::Quaternion::<f64>::from(float3x3::look_at(
+            float3::new(0.0, 0.0, -1.0),
+            float3::new(0.0, 1.0, 0.0),
+        )),
+    };
+
+    let model_transform = naivegl::utils::Transform {
+        translation: float3::new(0.0, 0.0, 0.0),
+        scale: float3::new(1.0, 1.0, 1.0),
+        rotation: cgmath::Quaternion::<f64>::one(),
+    };
+
     let cube_vs = |vin: &VShaderIn| {
-        let clip_pos = vin.vertex;
+        let clip_pos = camera.perspective_projection()
+            * camera.view_matrix()
+            * model_transform.to_matrix()
+            * vin.vertex;
         let vert_color = None;
         let world_normal = None;
         let screen_pos = None;
