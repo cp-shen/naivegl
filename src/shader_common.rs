@@ -22,7 +22,7 @@ pub struct VShaderIn {
 #[derive(Clone)]
 pub struct VShaderOut {
     pub clip_pos: float4,
-    pub screen_pos: Option<float4>,
+    pub screen_pos: Option<float3>,
     pub world_normal: Option<float4>,
     pub vert_color: Option<float4>,
 }

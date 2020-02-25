@@ -28,21 +28,27 @@ pub fn perform_screen_mapping(
         .par_iter()
         .map(|vout: &VShaderOut| {
             let mut vout_mapped = vout.to_owned();
+            let clip_pos = vout_mapped.clip_pos;
 
-            //TODO: transform clip_pos to NDC
-
-            //transform NDC to screenPos
-            let mut ndc_pos = vout_mapped.clip_pos;
+            //transform clip coords to NDC
+            let ndc_pos = float3 {
+                x: clip_pos.x / clip_pos.w,
+                y: clip_pos.y / clip_pos.w,
+                z: clip_pos.z / clip_pos.w,
+            };
+            //validate NDC
             if ndc_pos.x > 1.0 || ndc_pos.x < -1.0 || ndc_pos.y > 1.0 || ndc_pos.y < -1.0 {
                 panic!("invalid ndc pos")
             }
 
-            ndc_pos.x += 1.0;
-            ndc_pos.y += 1.0;
-            ndc_pos.x *= (width - 1) as f64 / 2.0;
-            ndc_pos.y *= (height - 1) as f64 / 2.0;
+            //transform NDC to screenPos
+            let screen_pos = float3 {
+                x: (ndc_pos.x + 1.0) * 0.5 * (width as f64 - 1.0),
+                y: (ndc_pos.y + 1.0) * 0.5 * (height as f64 - 1.0),
+                z: ndc_pos.z,
+            };
 
-            vout_mapped.screen_pos = Some(ndc_pos);
+            vout_mapped.screen_pos = Some(screen_pos);
             vout_mapped
         })
         .collect()
