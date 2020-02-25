@@ -5,37 +5,18 @@ use naivegl::utils::*;
 use rayon::prelude::*;
 
 #[test]
-fn draw_cube() {
+fn draw_tri_3d() {
     const SCR_WIDTH: usize = 800;
     const SCR_HEIGHT: usize = 800;
 
     #[rustfmt::skip]
-    let positions: [f64; 8 * 3] = [
+    let positions: [f64; 9] = [
         0.0, 0.0, 0.0,
-        0.0, 1.0, 0.0,
         1.0, 0.0, 0.0,
-        1.0, 1.0, 0.0,
-        0.0, 0.0, 1.0,
-        0.0, 1.0, 1.0,
-        1.0, 0.0, 1.0,
-        1.0, 1.0, 1.0,
+        0.0, 1.0, 0.0,
     ];
 
-    #[rustfmt::skip]
-    let indices = [
-        //0, 4, 1,
-        //4, 5, 1,
-        //4, 7, 5,
-        //4, 6, 7,
-        //6, 3, 7,
-        //6, 2, 3,
-        //0, 1, 3,
-        //3, 2, 0,
-        1, 5, 7,
-        1, 7, 3,
-        //0, 2, 6,
-        //0, 4, 4,
-    ];
+    let indices = [0, 1, 2];
 
     let vin_vec: Vec<VShaderIn> = positions
         .par_iter()
@@ -60,18 +41,18 @@ fn draw_cube() {
 
     let camera = Camera {
         near: 0.1,
-        far: 10.0,
+        far: 20.0,
         fovy: cgmath::Deg::<f64>(30.0),
         aspect: SCR_WIDTH as f64 / SCR_HEIGHT as f64,
-        position: float3::new(0.0, 6.0, 0.0),
+        position: float3::new(0.0, 0.0, 10.0),
         rotation: cgmath::Quaternion::<f64>::from(float3x3::look_at(
-            float3::new(0.0, -1.0, 0.0),
             float3::new(0.0, 0.0, -1.0),
+            float3::new(0.0, 1.0, 0.0),
         )),
     };
 
     let model_transform = naivegl::utils::Transform {
-        translation: float3::new(0.0, 0.0, 0.0),
+        translation: float3::new(0.6, 0.0, 0.0),
         scale: float3::new(1.0, 1.0, 1.0),
         rotation: cgmath::Quaternion::<f64>::from(float3x3::look_at(
             float3::new(0.0, 0.0, 1.0),
@@ -114,6 +95,6 @@ fn draw_cube() {
     let mut fb = Framebuffer::new(SCR_WIDTH, SCR_HEIGHT);
     process_pipeline(&vin_vec, &indices, cube_vs, cube_fs, &mut fb);
 
-    fb.write_image(std::path::Path::new("output/draw_cube.png"))
+    fb.write_image(std::path::Path::new("output/draw_tri_3d.png"))
         .unwrap();
 }

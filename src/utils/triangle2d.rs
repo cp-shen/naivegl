@@ -26,9 +26,9 @@ impl Triangle2d {
             y2: vertices[5],
         };
 
-        if tri.is_collinear() {
-            panic!("the 3 vertices of a triangle should not be colinear");
-        };
+        //if tri.is_colinear() {
+        //panic!("the 3 vertices of a triangle should not be colinear");
+        //};
 
         tri
     }
@@ -39,7 +39,7 @@ impl Triangle2d {
         val < 0.0
     }
 
-    fn is_collinear(&self) -> bool {
+    fn is_colinear(&self) -> bool {
         let val =
             (self.y1 - self.y0) * (self.x2 - self.x1) - (self.x1 - self.x0) * (self.y2 - self.y1);
         val == 0.0

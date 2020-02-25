@@ -12,6 +12,7 @@ pub struct Camera {
 }
 
 impl Camera {
+    /// right-handed
     pub fn perspective_projection(&self) -> float4x4 {
         cgmath::perspective(self.fovy, self.aspect, self.near, self.far)
     }
