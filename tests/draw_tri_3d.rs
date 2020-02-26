@@ -61,7 +61,7 @@ fn draw_tri_3d() {
 
     let mvp = projection_matrix * view_matrix * model_matrix;
 
-    let cube_vs = |vin: &VShaderIn| {
+    let vs = |vin: &VShaderIn| {
         let clip_pos = mvp * vin.vertex;
 
         VShaderOut {
@@ -70,7 +70,7 @@ fn draw_tri_3d() {
         }
     };
 
-    let cube_fs = |fin: &FShaderIn| {
+    let fs = |fin: &FShaderIn| {
         let depth = fin.depth;
         let color = match fin.value.vert_color {
             Some(color) => color,
@@ -87,12 +87,12 @@ fn draw_tri_3d() {
     };
 
     let mut fb = Framebuffer::new(SCR_WIDTH, SCR_HEIGHT);
-    let vout_vec = process_vertices(&vin_vec, cube_vs);
+    let vout_vec = process_vertices(&vin_vec, vs);
     let vout_vec_clipped = perform_clipping(&vout_vec);
     let vout_vec_mapped =
         perform_screen_mapping(&vout_vec_clipped, fb.get_width(), fb.get_height());
     let fin_vec = setup_triangle(&vout_vec_mapped, &indices);
-    let fout_vec = process_fragments(&fin_vec, cube_fs);
+    let fout_vec = process_fragments(&fin_vec, fs);
     merge_output(&fout_vec, &mut fb);
 
     for i in 0..vout_vec.len() {

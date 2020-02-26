@@ -78,7 +78,7 @@ fn draw_cube_diffuse() {
 
     let mvp = projection_matrix * view_matrix * model_matrix;
 
-    let cube_vs = |vin: &VShaderIn| {
+    let vs = |vin: &VShaderIn| {
         let clip_pos = mvp * vin.vertex;
         let world_pos = Some(model_matrix * vin.vertex);
         let vert_color = None;
@@ -97,7 +97,7 @@ fn draw_cube_diffuse() {
     let light_color = float4::new(1.0, 1.0, 1.0, 1.0);
     let cube_color = float4::new(1.0, 1.0, 1.0, 1.0);
 
-    let cube_fs = |fin: &FShaderIn| {
+    let fs = |fin: &FShaderIn| {
         let depth = fin.depth;
 
         let world_normal = fin.value.world_normal.unwrap();
@@ -121,7 +121,7 @@ fn draw_cube_diffuse() {
 
     let mut fb = Framebuffer::new(SCR_WIDTH, SCR_HEIGHT);
     fb.fill_color_float(cgmath::vec4(0.0, 0.0, 0.0, 1.0));
-    process_pipeline(&vin_vec, &indices, cube_vs, cube_fs, &mut fb);
+    process_pipeline(&vin_vec, &indices, vs, fs, &mut fb);
 
     fb.write_image(std::path::Path::new("output/draw_cube_diffuse.png"))
         .unwrap();

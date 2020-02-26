@@ -38,7 +38,7 @@ fn draw_tri() {
         })
         .collect();
 
-    let tri_vs = |vin: &VShaderIn| {
+    let vs = |vin: &VShaderIn| {
         let clip_pos = vin.vertex;
         let vert_color = vin.color;
         VShaderOut {
@@ -48,7 +48,7 @@ fn draw_tri() {
         }
     };
 
-    let tri_fs = |fin: &FShaderIn| {
+    let fs = |fin: &FShaderIn| {
         let depth = fin.depth;
         let color = match fin.value.vert_color {
             Some(color) => color,
@@ -65,7 +65,7 @@ fn draw_tri() {
     };
 
     let mut fb = Framebuffer::new(SCR_WIDTH, SCR_HEIGHT);
-    process_pipeline(&vin_vec, &indices, tri_vs, tri_fs, &mut fb);
+    process_pipeline(&vin_vec, &indices, vs, fs, &mut fb);
 
     fb.write_image(std::path::Path::new("output/draw_tri.png"))
         .unwrap();

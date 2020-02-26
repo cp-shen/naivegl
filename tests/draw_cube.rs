@@ -77,7 +77,7 @@ fn draw_cube() {
 
     let mvp = projection_matrix * view_matrix * model_matrix;
 
-    let cube_vs = |vin: &VShaderIn| {
+    let vs = |vin: &VShaderIn| {
         let clip_pos = mvp * vin.vertex;
         VShaderOut {
             clip_pos,
@@ -85,7 +85,7 @@ fn draw_cube() {
         }
     };
 
-    let cube_fs = |fin: &FShaderIn| {
+    let fs = |fin: &FShaderIn| {
         let depth = fin.depth;
         let color = match fin.value.vert_color {
             Some(color) => color,
@@ -102,7 +102,7 @@ fn draw_cube() {
     };
 
     let mut fb = Framebuffer::new(SCR_WIDTH, SCR_HEIGHT);
-    process_pipeline(&vin_vec, &indices, cube_vs, cube_fs, &mut fb);
+    process_pipeline(&vin_vec, &indices, vs, fs, &mut fb);
 
     fb.write_image(std::path::Path::new("output/draw_cube.png"))
         .unwrap();
