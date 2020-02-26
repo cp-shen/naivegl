@@ -4,7 +4,7 @@ use naivegl::shader_common::*;
 use rayon::prelude::*;
 
 #[test]
-fn draw_tri() {
+fn draw_tri_lerp_color() {
     const SCR_WIDTH: usize = 800;
     const SCR_HEIGHT: usize = 800;
 
@@ -25,7 +25,11 @@ fn draw_tri() {
                 let vertex = float4::new(positions[i], positions[i + 1], positions[i + 2], 1.0);
                 let vin = VShaderIn {
                     vertex,
-                    ..Default::default()
+                    normal: None,
+                    texcoord: None,
+                    texcoord1: None,
+                    tangent: None,
+                    color: Some(vertex),
                 };
                 Some(vin)
             } else {
@@ -64,6 +68,6 @@ fn draw_tri() {
     fb.fill_color_float(cgmath::vec4(0.0, 0.0, 0.0, 1.0));
     process_pipeline(&vin_vec, &indices, vs, fs, &mut fb);
 
-    fb.write_image(std::path::Path::new("output/draw_tri.png"))
+    fb.write_image(std::path::Path::new("output/draw_tri_lerp_color.png"))
         .unwrap();
 }

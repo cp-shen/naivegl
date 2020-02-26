@@ -27,11 +27,7 @@ fn draw_tri_3d() {
                 let vertex = float4::new(positions[i], positions[i + 1], positions[i + 2], 1.0);
                 let vin = VShaderIn {
                     vertex,
-                    normal: None,
-                    texcoord: None,
-                    texcoord1: None,
-                    tangent: None,
-                    color: None,
+                    ..Default::default()
                 };
                 Some(vin)
             } else {
@@ -41,13 +37,12 @@ fn draw_tri_3d() {
         .collect();
 
     let model_scale = float4x4::from_scale(1.0);
-
-    let model_rot = float4x4::from_angle_y(cgmath::Rad(0.0));
+    let model_rot = float4x4::from_angle_y(cgmath::Deg(45.0));
     let model_translation = float4x4::from_translation(cgmath::vec3(0.0, 0.0, 0.0));
     let model_matrix = model_translation * model_rot * model_scale;
 
     let view_matrix = float4x4::look_at_dir(
-        cgmath::Point3::new(0.0, 0.0, 5.0),
+        cgmath::Point3::new(0.0, 0.0, 3.0),
         float3::new(0.0, 0.0, -1.0),
         float3::new(0.0, 1.0, 0.0),
     );
@@ -87,6 +82,8 @@ fn draw_tri_3d() {
     };
 
     let mut fb = Framebuffer::new(SCR_WIDTH, SCR_HEIGHT);
+    fb.fill_color_float(cgmath::vec4(0.0, 0.0, 0.0, 1.0));
+
     let vout_vec = process_vertices(&vin_vec, vs);
     let vout_vec_clipped = perform_clipping(&vout_vec);
     let vout_vec_mapped =

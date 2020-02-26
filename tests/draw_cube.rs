@@ -102,6 +102,7 @@ fn draw_cube() {
     };
 
     let mut fb = Framebuffer::new(SCR_WIDTH, SCR_HEIGHT);
+    fb.fill_color_float(cgmath::vec4(0.0, 0.0, 0.0, 1.0));
     process_pipeline(&vin_vec, &indices, vs, fs, &mut fb);
 
     fb.write_image(std::path::Path::new("output/draw_cube.png"))
