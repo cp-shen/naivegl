@@ -19,9 +19,9 @@ naive software renderer for learning purpose
 
 ![](./output/draw_tri_lerp_color.png)
 
-- [  ] draw a triangle with a perspective camera
+- [x ] draw a triangle with a perspective camera
     - [x ] implement mvp matrix transform
-    - [  ] implement simple clipping (remove the triangle when one of its vertices is out of the frustum)
+    - [x ] implement naive clipping (remove the triangle when one of its vertices is out of the frustum)
     - [x ] implement homogeneous division and screen mapping
 
 ![](./output/draw_tri_3d.png)
@@ -38,4 +38,4 @@ naive software renderer for learning purpose
 
 ## Known Bugs
 
-- [  ] pixels on the sharing edge of two adjacent triangles may not be drawn (a gap is produced)
+- [ ] pixels on the sharing edge of two adjacent triangles may not be drawn (a gap is produced)

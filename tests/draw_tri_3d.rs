@@ -95,7 +95,7 @@ fn draw_tri_3d() {
     for i in 0..vout_vec.len() {
         let model_pos = vin_vec[i].vertex;
         let clip_pos = vout_vec[i].clip_pos;
-        let screen_pos = vout_vec_mapped[i].screen_pos.unwrap();
+        let screen_pos = vout_vec_mapped[i].to_owned().unwrap().screen_pos.unwrap();
         println!(
             "model_pos: {:3.4}, {:3.4}, {:3.4}, {:3.4}\
            \nclip_pos:  {:3.4}, {:3.4}, {:3.4}, {:3.4}\

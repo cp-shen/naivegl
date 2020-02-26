@@ -14,47 +14,79 @@ where
     vin_vec.par_iter().map(vs).collect()
 }
 
-pub fn perform_clipping(vout_vec: &[VShaderOut]) -> Vec<VShaderOut> {
-    //TODO: perform clipping
-    vout_vec.to_owned()
-}
-
-pub fn perform_screen_mapping(
-    vout_vec: &[VShaderOut],
-    width: usize,
-    height: usize,
-) -> Vec<VShaderOut> {
+pub fn perform_clipping(vout_vec: &[VShaderOut]) -> Vec<Option<VShaderOut>> {
     vout_vec
         .par_iter()
         .map(|vout: &VShaderOut| {
-            let mut vout_mapped = vout.to_owned();
-            let clip_pos = vout_mapped.clip_pos;
+            let clip_pos = vout.clip_pos;
+            assert_eq!(
+                clip_pos.w > 0.0,
+                true,
+                "w component of clip_pos is not greater than zero"
+            );
 
-            //transform clip coords to NDC
-            let ndc_pos = float3 {
-                x: clip_pos.x / clip_pos.w,
-                y: clip_pos.y / clip_pos.w,
-                z: clip_pos.z / clip_pos.w,
-            };
-            //validate NDC
-            if ndc_pos.x > 1.0 || ndc_pos.x < -1.0 || ndc_pos.y > 1.0 || ndc_pos.y < -1.0 {
-                panic!("invalid ndc pos: x={}, y={}", ndc_pos.x, ndc_pos.y)
+            let mut survive = true;
+
+            let w = clip_pos.w;
+            survive &= clip_pos.x >= -w || clip_pos.x <= w;
+            survive &= clip_pos.y >= -w || clip_pos.y <= w;
+            survive &= clip_pos.z >= -w || clip_pos.z <= w;
+
+            if survive {
+                Some(vout.to_owned())
+            } else {
+                None
             }
-
-            //transform NDC to screenPos
-            let screen_pos = float3 {
-                x: (ndc_pos.x + 1.0) * 0.5 * (width as f64 - 1.0),
-                y: (ndc_pos.y + 1.0) * 0.5 * (height as f64 - 1.0),
-                z: ndc_pos.z,
-            };
-
-            vout_mapped.screen_pos = Some(screen_pos);
-            vout_mapped
         })
         .collect()
 }
 
-pub fn setup_triangle(vout_vec: &[VShaderOut], indices: &[usize]) -> Vec<FShaderIn> {
+pub fn perform_screen_mapping(
+    vout_vec: &[Option<VShaderOut>],
+    width: usize,
+    height: usize,
+) -> Vec<Option<VShaderOut>> {
+    vout_vec
+        .par_iter()
+        .map(|vout_op: &Option<VShaderOut>| {
+            match vout_op {
+                None => None,
+                Some(vout) => {
+                    let mut vout_mapped = vout.to_owned();
+                    let clip_pos = vout_mapped.clip_pos;
+
+                    //transform clip coords to NDC
+                    assert_eq!(
+                        clip_pos.w > 0.0,
+                        true,
+                        "w component of clip_pos is not greater than zero"
+                    );
+                    let ndc_pos = float3 {
+                        x: clip_pos.x / clip_pos.w,
+                        y: clip_pos.y / clip_pos.w,
+                        z: clip_pos.z / clip_pos.w,
+                    };
+                    //validate NDC
+                    if ndc_pos.x > 1.0 || ndc_pos.x < -1.0 || ndc_pos.y > 1.0 || ndc_pos.y < -1.0 {
+                        panic!("invalid ndc pos: x={}, y={}", ndc_pos.x, ndc_pos.y)
+                    }
+
+                    //transform NDC to screenPos
+                    let screen_pos = float3 {
+                        x: (ndc_pos.x + 1.0) * 0.5 * (width as f64 - 1.0),
+                        y: (ndc_pos.y + 1.0) * 0.5 * (height as f64 - 1.0),
+                        z: ndc_pos.z,
+                    };
+
+                    vout_mapped.screen_pos = Some(screen_pos);
+                    Some(vout_mapped)
+                }
+            }
+        })
+        .collect()
+}
+
+pub fn setup_triangle(vout_vec: &[Option<VShaderOut>], indices: &[usize]) -> Vec<FShaderIn> {
     assert_eq!(
         indices.len() % 3,
         0,
@@ -64,17 +96,28 @@ pub fn setup_triangle(vout_vec: &[VShaderOut], indices: &[usize]) -> Vec<FShader
     indices
         .par_iter()
         .enumerate()
-        .filter_map(|(i, _)| {
+        .filter_map(|(i, _)| -> Option<(usize, usize, usize)> {
             if i % 3 == 0 {
                 Some((indices[i], indices[i + 1], indices[i + 2]))
             } else {
                 None
             }
         })
+        .filter_map(|(i0, i1, i2)| -> Option<(usize, usize, usize)> {
+            let mut survive = true;
+            survive &= vout_vec[i0].is_some();
+            survive &= vout_vec[i1].is_some();
+            survive &= vout_vec[i2].is_some();
+            if survive {
+                Some((i0, i1, i2))
+            } else {
+                None
+            }
+        })
         .map(|(i0, i1, i2)| -> Vec<FShaderIn> {
-            let v0 = vout_vec[i0].to_owned();
-            let v1 = vout_vec[i1].to_owned();
-            let v2 = vout_vec[i2].to_owned();
+            let v0 = vout_vec[i0].to_owned().unwrap();
+            let v1 = vout_vec[i1].to_owned().unwrap();
+            let v2 = vout_vec[i2].to_owned().unwrap();
 
             let scr0 = v0.screen_pos.unwrap();
             let scr1 = v1.screen_pos.unwrap();
