@@ -15,7 +15,8 @@
 - [  ] draw a white cube with a perspective camera
     - [  ] implement z-buffer and z-test
 
-- [  ] draw a cube with diffuse shading
+- [x ] draw a cube with diffuse shading
+    - [x ] calculate normal vector using two edge of a triangle
 
 ## Known Bugs
 
