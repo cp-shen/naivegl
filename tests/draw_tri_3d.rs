@@ -1,6 +1,7 @@
 use naivegl::framebuffer::*;
 use naivegl::pipeline::*;
 use naivegl::shader_common::*;
+#[allow(unused_imports)]
 use naivegl::utils::*;
 use rayon::prelude::*;
 
@@ -63,14 +64,9 @@ fn draw_tri_3d() {
     let cube_vs = |vin: &VShaderIn| {
         let clip_pos = mvp * vin.vertex;
 
-        let vert_color = None;
-        let world_normal = None;
-        let screen_pos = None;
         VShaderOut {
             clip_pos,
-            screen_pos,
-            vert_color,
-            world_normal,
+            ..Default::default()
         }
     };
 

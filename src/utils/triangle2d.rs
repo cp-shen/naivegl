@@ -39,6 +39,7 @@ impl Triangle2d {
         val < 0.0
     }
 
+    #[allow(dead_code)]
     fn is_colinear(&self) -> bool {
         let val =
             (self.y1 - self.y0) * (self.x2 - self.x1) - (self.x1 - self.x0) * (self.y2 - self.y1);

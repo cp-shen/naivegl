@@ -41,13 +41,10 @@ fn draw_tri() {
     let tri_vs = |vin: &VShaderIn| {
         let clip_pos = vin.vertex;
         let vert_color = vin.color;
-        let world_normal = None;
-        let screen_pos = None;
         VShaderOut {
             clip_pos,
-            screen_pos,
             vert_color,
-            world_normal,
+            ..Default::default()
         }
     };
 
