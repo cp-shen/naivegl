@@ -12,29 +12,29 @@ fn draw_cube() {
     #[rustfmt::skip]
     let positions: [f64; 8 * 3] = [
         0.0, 0.0, 0.0,
-        0.0, 1.0, 0.0,
-        1.0, 0.0, 0.0,
-        1.0, 1.0, 0.0,
-        0.0, 0.0, 1.0,
-        0.0, 1.0, 1.0,
-        1.0, 0.0, 1.0,
-        1.0, 1.0, 1.0,
+        0.0, 0.5, 0.0,
+        0.5, 0.0, 0.0,
+        0.5, 0.5, 0.0,
+        0.0, 0.0, 0.5,
+        0.0, 0.5, 0.5,
+        0.5, 0.0, 0.5,
+        0.5, 0.5, 0.5,
     ];
 
     #[rustfmt::skip]
     let indices = [
-        //0, 4, 1,
-        //4, 5, 1,
-        //4, 7, 5,
-        //4, 6, 7,
-        //6, 3, 7,
-        //6, 2, 3,
-        //0, 1, 3,
-        //3, 2, 0,
+        0, 4, 1,
+        4, 5, 1,
+        4, 7, 5,
+        4, 6, 7,
+        6, 3, 7,
+        6, 2, 3,
+        0, 1, 3,
+        3, 2, 0,
         1, 5, 7,
         1, 7, 3,
-        //0, 2, 6,
-        //0, 4, 4,
+        0, 2, 6,
+        0, 4, 4,
     ];
 
     let vin_vec: Vec<VShaderIn> = positions
@@ -58,32 +58,28 @@ fn draw_cube() {
         })
         .collect();
 
-    let camera = Camera {
-        near: 0.1,
-        far: 10.0,
-        fovy: cgmath::Deg::<f64>(30.0),
-        aspect: SCR_WIDTH as f64 / SCR_HEIGHT as f64,
-        position: float3::new(0.0, 6.0, 0.0),
-        rotation: cgmath::Quaternion::<f64>::from(float3x3::look_at(
-            float3::new(0.0, -1.0, 0.0),
-            float3::new(0.0, 0.0, -1.0),
-        )),
-    };
+    let model_scale = float4x4::from_scale(1.0);
+    let model_rot = float4x4::from_angle_y(cgmath::Deg(10.0));
+    let model_translation = float4x4::from_translation(cgmath::vec3(0.0, 0.0, 0.0));
+    let model_matrix = model_translation * model_rot * model_scale;
 
-    let model_transform = naivegl::utils::Transform {
-        translation: float3::new(0.0, 0.0, 0.0),
-        scale: float3::new(1.0, 1.0, 1.0),
-        rotation: cgmath::Quaternion::<f64>::from(float3x3::look_at(
-            float3::new(0.0, 0.0, 1.0),
-            float3::new(0.0, 1.0, 0.0),
-        )),
-    };
+    let view_matrix = float4x4::look_at_dir(
+        cgmath::Point3::new(0.0, 1.5, 2.5),
+        float3::new(0.0, -0.4, -1.0),
+        float3::new(0.0, 1.0, 0.0),
+    );
+
+    let projection_matrix: float4x4 = cgmath::perspective(
+        cgmath::Deg::<f64>(50.0),
+        SCR_WIDTH as f64 / SCR_HEIGHT as f64,
+        0.1,
+        100.0,
+    );
+
+    let mvp = projection_matrix * view_matrix * model_matrix;
 
     let cube_vs = |vin: &VShaderIn| {
-        let clip_pos = camera.perspective_projection()
-            * camera.view_matrix()
-            * model_transform.to_matrix()
-            * vin.vertex;
+        let clip_pos = mvp * vin.vertex;
         let vert_color = None;
         let world_normal = None;
         let screen_pos = None;

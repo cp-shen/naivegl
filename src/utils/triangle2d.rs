@@ -84,6 +84,12 @@ impl Triangle2d {
     }
 
     pub fn get_pixels(&self) -> Vec<(usize, usize, f64, f64, f64)> {
+        #[cfg(debug_assertions)]
+        println!(
+            "x0:{}, y0:{}, x1:{}, y1:{}, x2:{}, y2:{}",
+            self.x0, self.y0, self.x1, self.y1, self.x2, self.y2,
+        );
+
         if !self.is_counter_clockwise() {
             return vec![];
         }
@@ -100,8 +106,8 @@ impl Triangle2d {
 
         //Compute triangle bounding box
         let min_x: usize = self.x0.min(self.x1).min(self.x2).floor() as usize;
-        let min_y: usize = self.x0.min(self.x1).min(self.y2).floor() as usize;
-        let max_x: usize = self.y0.max(self.y1).max(self.y2).floor() as usize;
+        let min_y: usize = self.y0.min(self.y1).min(self.y2).floor() as usize;
+        let max_x: usize = self.x0.max(self.x1).max(self.x2).floor() as usize;
         let max_y: usize = self.y0.max(self.y1).max(self.y2).floor() as usize;
 
         let candidates: Vec<(usize, usize)> =
@@ -139,5 +145,13 @@ impl Triangle2d {
         let alpha = 1.0 - beta - gamma;
 
         (alpha, beta, gamma)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_triangle2d() {
+        //TODO
     }
 }
