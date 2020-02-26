@@ -7,6 +7,7 @@ pub struct Framebuffer {
     height: usize,
     ///Rgba Color
     color: Vec<(u8, u8, u8, u8)>,
+    depth: Vec<f64>,
 }
 
 impl Framebuffer {
@@ -21,10 +22,12 @@ impl Framebuffer {
     pub fn new(width: usize, height: usize) -> Framebuffer {
         let size = width.checked_mul(height).unwrap();
         let color = vec![(0, 0, 0, 0); size];
+        let depth = vec![1.01; size];
         Framebuffer {
             width,
             height,
             color,
+            depth,
         }
     }
 
@@ -42,8 +45,13 @@ impl Framebuffer {
         imgbuf.save(path)
     }
 
-    pub fn set_pixel(&mut self, x: usize, y: usize, color: (u8, u8, u8, u8)) {
-        self.color[x + y * self.height] = color;
+    pub fn set_pixel(&mut self, x: usize, y: usize, color: (u8, u8, u8, u8), depth: f64) {
+        let old_depth = self.depth[x + y * self.height];
+
+        if depth < old_depth {
+            self.color[x + y * self.height] = color;
+            self.depth[x + y * self.height] = depth;
+        }
     }
 
     pub fn fill_color_float(&mut self, color: float4) {

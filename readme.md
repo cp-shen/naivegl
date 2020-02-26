@@ -26,8 +26,7 @@ naive software renderer for learning purpose
 
 ![](./output/draw_tri_3d.png)
 
-- [ ] draw a white cube with a perspective camera
-    - [ ] implement z-buffer and z-test
+- [x] draw a white cube with a perspective camera
 
 ![](./output/draw_cube.png)
 
@@ -36,3 +35,7 @@ naive software renderer for learning purpose
 
 ![](./output/draw_cube_diffuse.png)
 
+- [x] draw two cubes overlapping each other to demonstrate z-test is working
+    - [x] implement z-buffer and z-test
+
+![](./output/draw_cube_overlapping.png)

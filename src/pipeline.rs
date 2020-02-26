@@ -232,7 +232,7 @@ pub fn merge_output(fout_vec: &[FShaderOut], fb: &mut Framebuffer) {
             get_8bit_color(c.z),
             get_8bit_color(c.w),
         );
-        fb.set_pixel(fout.screen_x, fout.screen_y, color)
+        fb.set_pixel(fout.screen_x, fout.screen_y, color, fout.depth)
     })
 }
 

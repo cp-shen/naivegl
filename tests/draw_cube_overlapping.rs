@@ -59,7 +59,7 @@ fn draw_cube_overlapping() {
         .collect();
 
     let model_scale = float4x4::from_scale(1.0);
-    let model_rot = float4x4::from_angle_y(cgmath::Deg(10.0));
+    let model_rot = float4x4::from_angle_y(cgmath::Deg(30.0));
     let model_translation = float4x4::from_translation(cgmath::vec3(0.0, 0.0, 0.0));
     let model_matrix = model_translation * model_rot * model_scale;
 
@@ -81,21 +81,16 @@ fn draw_cube_overlapping() {
     let vs = |vin: &VShaderIn| {
         let clip_pos = mvp * vin.vertex;
         let world_pos = Some(model_matrix * vin.vertex);
-        let vert_color = None;
-        let world_normal = None;
-        let screen_pos = None;
         VShaderOut {
             world_pos,
             clip_pos,
-            screen_pos,
-            vert_color,
-            world_normal,
+            ..Default::default()
         }
     };
 
     let light_dir = float3::new(1.0, -1.0, -1.0).normalize();
     let light_color = float4::new(1.0, 1.0, 1.0, 1.0);
-    let cube_color = float4::new(1.0, 1.0, 1.0, 1.0);
+    let cube_color = float4::new(0.0, 1.0, 0.0, 1.0);
 
     let fs = |fin: &FShaderIn| {
         let depth = fin.depth;
@@ -121,6 +116,63 @@ fn draw_cube_overlapping() {
 
     let mut fb = Framebuffer::new(SCR_WIDTH, SCR_HEIGHT);
     fb.fill_color_float(cgmath::vec4(0.0, 0.0, 0.0, 1.0));
+    process_pipeline(&vin_vec, &indices, vs, fs, &mut fb);
+
+    //draw a second cube and make them overlapping
+    let model_scale = float4x4::from_scale(1.0);
+    let model_rot = float4x4::from_angle_y(cgmath::Deg(30.0));
+    let model_translation = float4x4::from_translation(cgmath::vec3(-0.2, 0.2, -0.2));
+    let model_matrix = model_translation * model_rot * model_scale;
+
+    let view_matrix = float4x4::look_at_dir(
+        cgmath::Point3::new(0.0, 1.5, 2.5),
+        float3::new(0.0, -0.4, -1.0),
+        float3::new(0.0, 1.0, 0.0),
+    );
+
+    let projection_matrix: float4x4 = cgmath::perspective(
+        cgmath::Deg::<f64>(50.0),
+        SCR_WIDTH as f64 / SCR_HEIGHT as f64,
+        0.1,
+        100.0,
+    );
+
+    let mvp = projection_matrix * view_matrix * model_matrix;
+
+    let vs = |vin: &VShaderIn| {
+        let clip_pos = mvp * vin.vertex;
+        let world_pos = Some(model_matrix * vin.vertex);
+        VShaderOut {
+            world_pos,
+            clip_pos,
+            ..Default::default()
+        }
+    };
+
+    let cube_color = cgmath::vec4(0.0, 0.0, 1.0, 1.0);
+
+    let fs = |fin: &FShaderIn| {
+        let depth = fin.depth;
+
+        let world_normal = fin.value.world_normal.unwrap();
+        let mut light_scalar = cgmath::dot(world_normal.truncate(), light_dir) * -1.0;
+        light_scalar = light_scalar.max(0.0);
+
+        let mut color = light_color.mul_element_wise(cube_color);
+        color *= light_scalar;
+        color.w = 1.0;
+
+        let screen_x = fin.screen_x;
+        let screen_y = fin.screen_y;
+
+        FShaderOut {
+            depth,
+            color,
+            screen_x,
+            screen_y,
+        }
+    };
+
     process_pipeline(&vin_vec, &indices, vs, fs, &mut fb);
 
     fb.write_image(std::path::Path::new("output/draw_cube_overlapping.png"))
