@@ -1,3 +1,7 @@
+use crate::shader_common::*;
+use crate::utils::*;
+use rayon::prelude::*;
+
 pub struct Framebuffer {
     width: usize,
     height: usize,
@@ -40,5 +44,14 @@ impl Framebuffer {
 
     pub fn set_pixel(&mut self, x: usize, y: usize, color: (u8, u8, u8, u8)) {
         self.color[x + y * self.height] = color;
+    }
+
+    pub fn fill_color_float(&mut self, color: float4) {
+        self.color.par_iter_mut().for_each(|(r, g, b, a)| {
+            *r = get_8bit_color(color.x);
+            *g = get_8bit_color(color.y);
+            *b = get_8bit_color(color.z);
+            *a = get_8bit_color(color.w);
+        });
     }
 }

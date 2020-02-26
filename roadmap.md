@@ -16,7 +16,7 @@
     - [  ] implement z-buffer and z-test
 
 - [x ] draw a cube with diffuse shading
-    - [x ] calculate normal vector using two edge of a triangle
+    - [x ] calculate normal vector using two edges of a triangle
 
 ## Known Bugs
 

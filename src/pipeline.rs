@@ -3,6 +3,7 @@
 use crate::framebuffer::*;
 use crate::shader_common::*;
 use crate::utils::*;
+use cgmath::prelude::*;
 use rayon::prelude::*;
 use std::marker::{Send, Sync};
 
@@ -106,7 +107,7 @@ pub fn setup_triangle(vout_vec: &[VShaderOut], indices: &[usize]) -> Vec<FShader
                         None
                     };
 
-                    let world_normal = if v0
+                    let mut world_normal = if v0
                         .world_normal
                         .and(v1.world_normal.and(v2.world_normal))
                         .is_some()
@@ -134,10 +135,28 @@ pub fn setup_triangle(vout_vec: &[VShaderOut], indices: &[usize]) -> Vec<FShader
                         None
                     };
 
+                    let world_pos = if v0.world_pos.and(v1.world_pos.and(v2.world_pos)).is_some() {
+                        Some(
+                            v0.world_pos.unwrap() * *alpha
+                                + v1.world_pos.unwrap() * *beta
+                                + v2.world_pos.unwrap() * *gamma,
+                        )
+                    } else {
+                        None
+                    };
+
+                    if world_pos.is_some() && world_normal.is_none() {
+                        let edge01 = v1.world_pos.unwrap() - v0.world_pos.unwrap();
+                        let edge12 = v2.world_pos.unwrap() - v1.world_pos.unwrap();
+                        let normal = edge01.truncate().cross(edge12.truncate()).normalize();
+                        world_normal = Some(cgmath::vec4(normal.x, normal.y, normal.z, 0.0));
+                    };
+
                     let interpolated = VShaderOut {
+                        world_normal,
                         clip_pos,
                         screen_pos,
-                        world_normal,
+                        world_pos,
                         vert_color,
                     };
 
